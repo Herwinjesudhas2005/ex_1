@@ -1,0 +1,134 @@
+import 'package:flutter/material.dart';
+import 'dart:math';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'EMI Calculator',
+      home: EmiCalculator(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class EmiCalculator extends StatefulWidget {
+  @override
+  _EmiCalculatorState createState() => _EmiCalculatorState();
+}
+
+class _EmiCalculatorState extends State<EmiCalculator> {
+  final TextEditingController _loanController = TextEditingController();
+  final TextEditingController _interestController = TextEditingController();
+  final TextEditingController _tenureController = TextEditingController();
+
+  double _emi = 0.0;
+
+  void calculateEmi() {
+    double principal = double.tryParse(_loanController.text) ?? 0;
+    double annualRate = double.tryParse(_interestController.text) ?? 0;
+    int tenureYears = int.tryParse(_tenureController.text) ?? 0;
+
+    if (principal <= 0 || annualRate <= 0 || tenureYears <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter valid values for all fields."),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    double monthlyRate = annualRate / (12 * 100); // Convert annual rate to monthly
+    int months = tenureYears * 12;
+
+    // EMI formula: [P * R * (1+R)^N] / [(1+R)^N - 1]
+    double emi = (principal * monthlyRate * pow(1 + monthlyRate, months)) /
+        (pow(1 + monthlyRate, months) - 1);
+
+    setState(() {
+      _emi = emi;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('EMI Calculator'),
+        centerTitle: true,
+        backgroundColor: Colors.teal,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _loanController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Loan Amount (₹)",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _interestController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Annual Interest Rate (%)",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _tenureController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Tenure (in Years)",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+              ),
+              onPressed: calculateEmi,
+              child: const Text(
+                "Calculate EMI",
+                style: TextStyle(fontSize: 18, color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 30),
+            if (_emi > 0)
+              Column(
+                children: [
+                  const Text(
+                    "Your Monthly EMI is:",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "₹ ${_emi.toStringAsFixed(2)}",
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
