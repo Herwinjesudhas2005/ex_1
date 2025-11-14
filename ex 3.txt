@@ -1,0 +1,107 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class HealthService {
+  final String name;
+  final double cost;
+  final String schedule;
+
+  HealthService({required this.name, required this.cost, required this.schedule});
+}
+
+class MyApp extends StatelessWidget {
+  MyApp({super.key});
+
+  final List<HealthService> services = [
+    HealthService(name: "Yoga Session", cost: 500, schedule: "6:00 AM - 7:00 AM"),
+    HealthService(name: "Nutrition Consultation", cost: 1200, schedule: "10:00 AM - 11:00 AM"),
+    HealthService(name: "Cardio Workout", cost: 800, schedule: "5:00 PM - 6:00 PM"),
+    HealthService(name: "Mental Wellness Talk", cost: 600, schedule: "7:00 PM - 8:00 PM"),
+    HealthService(name: "Health Checkup", cost: 2500, schedule: "9:00 AM - 10:00 AM"),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: "Health Organizer App",
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Health Organizer',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: const Color.fromARGB(255, 0, 153, 153),
+          centerTitle: true,
+        ),
+        body: ListView.builder(
+          itemCount: services.length,
+          itemBuilder: (context, index) {
+            final service = services[index];
+            return Column(
+              children: [
+                const SizedBox(height: 10),
+                ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.tealAccent[700],
+                    child: Text(
+                      service.name[0],
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  title: Text(service.name),
+                  subtitle: Text(
+                    "₹${service.cost} • Time: ${service.schedule}",
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                  trailing: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("Booking Confirmed"),
+                          content: Text("${service.name} has been successfully booked!"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("OK"),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    child: const Text("Book Now"),
+                  ),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Selected: ${service.name}"),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  onLongPress: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Hold detected on ${service.name}"),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                ),
+                const Divider(),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
